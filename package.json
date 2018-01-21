@@ -25,17 +25,20 @@
     "type": "git",
     "url": "https://github.com/keathleydavidj/squares-game.git"
   },
- "homepage": "https://keathleydavidj.github.io/squares-game/",
+  "homepage": "https://keathleydavidj.github.io/squares-game/",
   "devDependencies": {
+    "babel-plugin-jsx-pragmatic": "^1.0.2",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
     "cross-env": "^5.1.1",
     "gh-pages": "^1.1.0",
     "parcel-bundler": "^1.1.0",
+    "snabbdom-jsx": "^0.4.2",
     "typescript": "^2.6.2"
   },
   "dependencies": {
-    "@types/react": "^16.0.34",
-    "@types/react-dom": "^16.0.3",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "@cycle/dom": "^20.1.0",
+    "@cycle/run": "^4.1.0",
+    "xstream": "^11.1.0"
   }
 }

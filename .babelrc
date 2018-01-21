@@ -1,0 +1,8 @@
+{
+    "presets": [ "env" ],
+    "plugins": [
+        "syntax-jsx",
+        ["transform-react-jsx", { "pragma": "bsj.html" }],
+        ["jsx-pragmatic", { "module": "snabbdom-jsx", "import": "bsj" }]
+]
+}

@@ -7,7 +7,7 @@
     "target": "es5",
     "sourceMap": true,
     "declaration": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "lib": [
       "es2017",
       "dom"
@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ],
   "exclude": [
     ".git",
