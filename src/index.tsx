@@ -10,7 +10,8 @@ import {
     GameBoard,
     Row,
     Sources,
-    Sinks
+    Sinks,
+    State
 } from './types'
 
 function padTo<T>(array: T[], length: number, padWith: T): T[] {
@@ -20,8 +21,7 @@ function padTo<T>(array: T[], length: number, padWith: T): T[] {
     return array
 }
 
-const up = (game: Game): Game => {
-    const {board, score} = game
+const up = ([score, board]: Game): Game => {
     const newBoard = board.map(
         (row: Row): Row => {
             const newRow = row
@@ -36,15 +36,13 @@ const up = (game: Game): Game => {
             return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
         }
     )
-    return {
-        board: newBoard,
+    return [
         score,
-        ...game
-    } as Game
+        newBoard
+    ] as Game
 }
 
-const down = (game: Game): Game => {
-    const {board, score} = game
+const down = ([score, board]: Game): Game => {
     const newBoard = board.map(
         (row: Row): Row => {
             const newRow = row
@@ -59,15 +57,13 @@ const down = (game: Game): Game => {
             return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
         }
     )
-    return {
-        board: newBoard,
+    return [
         score,
-        ...game
-    } as Game
+        newBoard
+    ] as Game
 }
 
-const left = (game: Game): Game => {
-    const {board, score} = game
+const left = ([score, board]: Game): Game => {
     const newBoard = board.map(
         (row: Row): Row => {
             const newRow = row
@@ -82,15 +78,14 @@ const left = (game: Game): Game => {
             return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
         }
     )
-    return {
-        board: newBoard,
+    return [
         score,
-        ...game
-    } as Game
+        newBoard
+    ] as Game
+
 }
 
-const right = (game: Game): Game => {
-    const {board, score} = game
+const right = ([score, board]: Game): Game => {
     const newBoard = board.map(
         (row: Row): Row => {
             const newRow = row
@@ -107,11 +102,10 @@ const right = (game: Game): Game => {
             return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
         }
     )
-    return {
-        board: newBoard,
+    return [
         score,
-        ...game
-    } as Game
+        newBoard
+    ] as Game
 }
 
 function intent(domSource: DOMSource): Actions {
@@ -132,31 +126,46 @@ function intent(domSource: DOMSource): Actions {
     }
 }
 
-function model({moveFn$}: Actions, game$: MemoryStream<Game>): MemoryStream<Game> {
-    return moveFn$.map(f => game$.map(game => f(game))).flatten()
+function model({moveFn$}: Actions): State {
+    const initialState = [ 
+        0,
+        [
+            [ 2, null, 2, null ],
+            [ null, null, null, null ],
+            [ 2, null, null, null ],
+            [ null, 2, 2, 2 ]
+        ].map(row => row.map(num => Maybe.of(num))) as GameBoard,
+    ] as Game
+
+    const gameState$ = moveFn$.fold((state, reducer) => reducer(state), initialState)
+    return gameState$   
 }
 
 function renderBoard(board: GameBoard): VNode {
     return (
-        <div className="game">
-        {board.map(row => 
-            <div className="row">
-            {row.map(cell => 
-                <span className="cell">value: {cell.withDefault(0)} </span>
+        <div className="game-container">
+            <div className="grid-container">
+            {board.map(row => 
+                <div className="grid-row">
+                {row.map(cell => 
+                    <span className="grid-element">value: {cell.withDefault(0)} </span>
+                )}
+                </div>
             )}
             </div>
-        )}
         </div>
     )
 }
 
-function view(state$: MemoryStream<Game>): Stream<VNode> {
-    return state$.map(({board, score}) => {
+function view(state$: State): Stream<VNode> {
+    return state$.map(([score, board]) => {
         return (
             <div className="main">
                 <h1>2048</h1>
                 <p>Score: {score}</p>
                 {renderBoard(board)}
+                <button className="btn-up">Up</button>
+                <button className="btn-down">Down</button>
                 <button className="btn-left">Left</button>
                 <button className="btn-right">Right</button>
             </div>
@@ -166,24 +175,14 @@ function view(state$: MemoryStream<Game>): Stream<VNode> {
 
 function main(sources: Sources): Sinks {
     const actions = intent(sources.DOM)
-    const state$ = model(actions, sources.game)
+    const state$ = model(actions)
     const vdom$ = view(state$)
     const sinks = { DOM: vdom$ }
     return sinks
 }
-const initGame = [
-    [ 2, null, 2, null ],
-    [ null, null, null, null ],
-    [ 2, null, null, null ],
-    [ null, 2, 2, 2 ]
-].map(row => row.map(num => Maybe.of(num))) as GameBoard
 
 const drivers = {
-    DOM: makeDOMDriver('#app'),
-    game: xs.of({
-        board: initGame,
-        score: 0
-    } as Game)
+    DOM: makeDOMDriver('#app')
 }
 
 run(main, drivers)
