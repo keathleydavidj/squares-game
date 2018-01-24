@@ -13,100 +13,7 @@ import {
     Sinks,
     State
 } from './types'
-
-function padTo<T>(array: T[], length: number, padWith: T): T[] {
-    while (array.length < length) {
-        array.push(padWith)
-    }
-    return array
-}
-
-const up = ([score, board]: Game): Game => {
-    const newBoard = board.map(
-        (row: Row): Row => {
-            const newRow = row
-                .filter(mNum => mNum.hasSomething)
-                .reduce((acc: number[], x: Maybe<number>): number[] => {
-                    return x.map((num) => {
-                        const last = acc.pop()
-                        const val = !!last ? last === num ? [last + num] : [last, num] : [num];
-                        return acc.concat(val)
-                    }).withDefault(acc)
-            }, [])
-            return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
-        }
-    )
-    return [
-        score,
-        newBoard
-    ] as Game
-}
-
-const down = ([score, board]: Game): Game => {
-    const newBoard = board.map(
-        (row: Row): Row => {
-            const newRow = row
-                .filter(mNum => mNum.hasSomething)
-                .reduce((acc: number[], x: Maybe<number>): number[] => {
-                    return x.map((num) => {
-                        const last = acc.pop()
-                        const val = !!last ? last === num ? [last + num] : [last, num] : [num];
-                        return acc.concat(val)
-                    }).withDefault(acc)
-            }, [])
-            return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
-        }
-    )
-    return [
-        score,
-        newBoard
-    ] as Game
-}
-
-const left = ([score, board]: Game): Game => {
-    const newBoard = board.map(
-        (row: Row): Row => {
-            const newRow = row
-                .filter(mNum => mNum.hasSomething)
-                .reduce((acc: number[], x: Maybe<number>): number[] => {
-                    return x.map((num) => {
-                        const last = acc.pop()
-                        const val = !!last ? last === num ? [last + num] : [last, num] : [num];
-                        return acc.concat(val)
-                    }).withDefault(acc)
-            }, [])
-            return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
-        }
-    )
-    return [
-        score,
-        newBoard
-    ] as Game
-
-}
-
-const right = ([score, board]: Game): Game => {
-    const newBoard = board.map(
-        (row: Row): Row => {
-            const newRow = row
-                .reverse()
-                .filter(mNum => mNum.hasSomething)
-                .reduce((acc: number[], x: Maybe<number>): number[] => {
-                    return x.map((num) => {
-                        const last = acc.pop()
-                        const val = !!last ? last === num ? [last + num] : [last, num] : [num];
-                        return acc.concat(val)
-                    }).withDefault(acc)
-                }, [])
-                .reverse()
-            return padTo(newRow, 4, undefined).map(x => Maybe.of(x))
-        }
-    )
-    return [
-        score,
-        newBoard
-    ] as Game
-}
+import { up, down, right, left } from './transforms'
 
 function intent(domSource: DOMSource): Actions {
     const upFn$ = domSource .select('.btn-up') .events('click') .mapTo(up)
@@ -163,6 +70,7 @@ function view(state$: State): Stream<VNode> {
             <div className="main">
                 <h1>2048</h1>
                 <p>Score: {score}</p>
+                <p>High Score: Not yet implemented</p>
                 {renderBoard(board)}
                 <button className="btn-up">Up</button>
                 <button className="btn-down">Down</button>
