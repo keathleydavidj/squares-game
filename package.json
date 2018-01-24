@@ -39,6 +39,9 @@
   "dependencies": {
     "@cycle/dom": "^20.1.0",
     "@cycle/run": "^4.1.0",
+    "@types/ramda": "^0.25.16",
+    "maybe-not": "^1.1.0",
+    "ramda": "^0.25.0",
     "xstream": "^11.1.0"
   }
 }
