@@ -1,4 +1,5 @@
 import { Maybe } from 'maybe-not'
+import * as R from 'ramda'
 import { 
     Game,
     Row,
@@ -83,26 +84,19 @@ export const left = ([score, board]: Game): Game => {
 }
 
 export const right = ([score, board]: Game): Game => {
+    const adjustScore = ( scoreUp: number ): number => { score += scoreUp; return scoreUp }
+    const calcScore = (num1, num2): number[] =>
+        num1 === num2 ? [adjustScore(num1 + num2)] : [num1, num2]
+    const mCalcScore = Maybe.lift2(calcScore)
     const newBoard = board.map(
         (row: Row): Row => {
             const newRow = row
                 .reverse()
                 .filter(mNum => mNum.hasSomething)
-                .reduce((acc: number[], x: Maybe<number>): number[] => {
-                    return x.map((num) => {
-                        const last = acc.pop()
-                        let val = [num]
-                        if (!!last && last === num) {
-                            val = [last + num]
-                            score += last + num
-                        }
-                        else if (!!last) {
-                            val = [last, num]
-                        }
-                        return val.concat(acc)
-                    }).withDefault(acc)
-                }, [])
-            return padTo(newRow, 4, undefined).reverse().map(x => Maybe.of(x))
+                .reduce((acc: Maybe<number[]>, y: Maybe<number>): Maybe<number[]> => {
+                    return acc.map((a: number[]) => a.concat(mCalcScore(R.last(a), y)))
+                }, Maybe.just([]))
+            return padTo(newRow, 4, Maybe.nothing<number>()).reverse()
         }
     )
     return [

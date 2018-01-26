@@ -14,6 +14,7 @@ import {
     State
 } from './types'
 import { up, down, right, left } from './transforms'
+import { GameGrid } from './components/game-grid'
 
 function intent(domSource: DOMSource): Actions {
     const upFn$ = domSource .select('.btn-up') .events('click') .mapTo(up)
@@ -82,11 +83,12 @@ function view(state$: State): Stream<VNode> {
 }
 
 function main(sources: Sources): Sinks {
-    const actions = intent(sources.DOM)
-    const state$ = model(actions)
-    const vdom$ = view(state$)
-    const sinks = { DOM: vdom$ }
-    return sinks
+    // const actions = intent(sources.DOM)
+    // const state$ = model(actions)
+    // const vdom$ = view(state$)
+    // const sinks = { DOM: vdom$ }
+    // return sinks
+    return GameGrid(sources)
 }
 
 const drivers = {
