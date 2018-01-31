@@ -24,7 +24,7 @@ describe('Basic transforms', function() {
         })
     })
 
-    describe('Right', function() {
+    describe.skip('Right', function() {
         it('should also work', function() {
             let state = right([ 0, boardToMaybe([
                 [null, null, 2, 2],

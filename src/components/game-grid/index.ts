@@ -16,7 +16,7 @@ type Grid = number[][]
 
 const generateGrid = (gridSize: number): Grid => {
     const arr = [...Array(gridSize)]
-    const row: number[] = arr.fill(0)
+    const row: number[] = arr.fill(0).map((x, i) => i * 2)
     const grid: number[][] = arr.fill(row)
     return grid
 }
@@ -30,19 +30,29 @@ const padTo = <T>(length: number, padWith: T) => (array: T[]): T[] => {
 
 const padTo4WithZeros = padTo(4, 0)
 
-const rowReducer = R.scan(
-    (x: number, y: number): number => x == y ? x + y : y, 0
-)
-const foldRow = (row: number[]): number[] => 
-    rowReducer(row.filter(x => x > 0))
+const foldRow = (a: number[]) => R.unfold(
+    ([fst, snd, i]: number[]): false | [number, [number, number, number]] => {
+        let sum = fst === snd ? fst + snd : fst;
+        let result: [number, number, number] = fst === snd ? [a[i+1], a[i+2], i+2] : [sum, a[i+1], i+1]
+        return a.length <= i ? false : [sum, result]
+    }, [a[0], a[1], 1])
+
+// const foldRow = (row: number[]): number[] => 
+//     row.filter(x => x > 0)
+//     .reduce((arr, y) => {
+//         const x = R.last(arr)
+//         const value = x != undefined ?
+//             x == y ? [x + y] : [x, y] : [y]
+//         return arr.concat(value)
+//     }, new Array() as number[])
 
 const mirrorGrid = (grid: Grid): Grid => {
     let newGrid: Grid = [[],[],[],[]]
     grid.forEach((row, idx) =>
         row.forEach((x, idx1) => 
-            newGrid[idx1][idx] = grid[idx][idx1]))
+            newGrid[idx1][idx] = x))
     return newGrid
-}
+}   
 const mkFlippedReducer = (fn: (grid: Grid) => Grid) =>
     R.compose(mirrorGrid, fn, mirrorGrid)
 
@@ -50,12 +60,12 @@ const leftReducer = R.compose(padTo4WithZeros, foldRow)
 const left = (grid: Grid): Grid => grid.map(leftReducer)
 const up = mkFlippedReducer(left)
 
-const reverse = <T>(list: T[]): T[] => list.reverse()
-const rightReducer = R.compose(reverse, leftReducer, reverse)
+const reverseRow = (row: number[]): number[] => row.reverse()
+const rightReducer = R.compose(reverseRow, padTo4WithZeros, foldRow, reverseRow)
 const right = (grid: Grid): Grid => grid.map(rightReducer)
 const down = mkFlippedReducer(right)
 
-export function GameGrid(sources: { DOM: DOMSource }): { DOM: MemoryStream<VNode> } {
+export default function GameGrid(sources: { DOM: DOMSource }): { DOM: MemoryStream<VNode> } {
     const up$ = sources.DOM.select('.btn-up').events('click').mapTo(up)
     const down$ = sources.DOM.select('.btn-down').events('click').mapTo(down)
     const left$ = sources.DOM.select('.btn-left').events('click').mapTo(left)
@@ -86,8 +96,12 @@ export function GameGrid(sources: { DOM: DOMSource }): { DOM: MemoryStream<VNode
     }
 }
 
-const drivers = {
-    DOM: makeDOMDriver('#app')
-}
-const main = GameGrid
-run(main, drivers)
+// const drivers = {
+//     DOM: makeDOMDriver('#app')
+// } 
+// const main = GameGrid
+// run(main, {
+//     DOM: <DOMSource>makeDOMDriver('#app')
+// })
+
+export { left, right, up, down }

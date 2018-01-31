@@ -85,7 +85,7 @@ export const left = ([score, board]: Game): Game => {
 
 export const right = ([score, board]: Game): Game => {
     const adjustScore = ( scoreUp: number ): number => { score += scoreUp; return scoreUp }
-    const calcScore = (num1, num2): number[] =>
+    const calcScore = (num1: number, num2: number): number[] =>
         num1 === num2 ? [adjustScore(num1 + num2)] : [num1, num2]
     const mCalcScore = Maybe.lift2(calcScore)
     const newBoard = board.map(
@@ -94,9 +94,9 @@ export const right = ([score, board]: Game): Game => {
                 .reverse()
                 .filter(mNum => mNum.hasSomething)
                 .reduce((acc: Maybe<number[]>, y: Maybe<number>): Maybe<number[]> => {
-                    return acc.map((a: number[]) => a.concat(mCalcScore(R.last(a), y)))
+                    return acc.map((a: number[]) => a.concat(mCalcScore(Maybe.of(R.last(a)), y)))
                 }, Maybe.just([]))
-            return padTo(newRow, 4, Maybe.nothing<number>()).reverse()
+            return padTo(newRow, 4, Maybe.nothing<number>()).map(x => x.reverse())
         }
     )
     return [
