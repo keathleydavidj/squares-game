@@ -65,6 +65,11 @@ const rightReducer = R.compose(reverseRow, padTo4WithZeros, foldRow, reverseRow)
 const right = (grid: Grid): Grid => grid.map(rightReducer)
 const down = mkFlippedReducer(right)
 
+const insertRandomElement = (grid: Grid): Grid =>
+    grid.map((row: number[], i: number) => 
+        row.map((value: number, j: number) => [value, [i,j]])
+            .filter(([val]) => val === 0))
+
 export default function GameGrid(sources: { DOM: DOMSource }): { DOM: MemoryStream<VNode> } {
     const up$ = sources.DOM.select('.btn-up').events('click').mapTo(up)
     const down$ = sources.DOM.select('.btn-down').events('click').mapTo(down)
